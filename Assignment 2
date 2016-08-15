@@ -1,0 +1,121 @@
+# I am storing the variables for the time zones so that I can use them later in the program
+eScore = 0.0
+eTweets = 0.0
+cScore = 0.0
+cTweets = 0.0
+mScore = 0.0
+mTweets = 0.0
+pScore = 0.0
+pTweets = 0.0
+
+# Create a function for the latitude and longitude
+def getLatAndLong(strLatAndLong):
+    modifiedLatAndLong1 = strLatAndLong.split("]",)
+    modifiedLatAndLong2 = modifiedLatAndLong1[0].split(",")
+    modifiedLatAndLong2[0] = modifiedLatAndLong2[0].replace("[","")
+    return(modifiedLatAndLong2)
+
+# Figure out the time zone of the inputted latitude and longitude
+def findTimeZone(lat, long):
+    if lat>= 24.660845 and lat <= 49.189787:
+        if long>=  -87.518395 and long <= -67.444574:
+            return("Eastern")
+        elif long >= -101.998892 and long<= -87.51839:
+            return("Central")
+        elif long >= -115.236428 and long<= -101.998892:
+            return("Mountain")
+        elif long >= -125.242264 and long<= -115.236428:
+            return("Pacific")
+        else:
+            return("None")
+    else:
+        return("None")
+
+# Split the text part of the tweet
+
+def getTweets (i):
+    modifiedTweets = allOfTweets[i].split(" ")
+    tweetSegment = ""
+    for i in range (5, len(modifiedTweets)):
+        if tweetSegment == "":
+            tweetSegment = modifiedTweets[i]
+        else:
+            tweetSegment = tweetSegment+" "+modifiedTweets[i]
+    return(tweetSegment)
+
+# Get the value of each of the tweets based on the keywords
+
+def tweetsValue(tweets):
+    keywordsNum = 0
+    score = 0.0
+    for word in tweets.split():
+        if word in alist:
+            score = score + 10
+            keywordsNum = keywordsNum + 1
+        elif word in blist:
+            score = score + 5
+            keywordsNum = keywordsNum + 1
+        elif word in clist:
+            score = score + 1
+            keywordsNum = keywordsNum + 1
+
+    if keywordsNum > 0:
+        return (score/keywordsNum)
+    else:
+        return 0
+
+
+# Get the user input and open the tweets and keywords files
+
+tweets = input("Enter the name of the text file containing the tweets. ")
+tweetsFile = open("tweets.txt","r",encoding="utf-8")
+
+keywords = input("Enter the name of the keywords file containing the keywords. ")
+keywordsFile = open("keywords.txt", "r", encoding="utf-8")
+
+alist = []
+blist = []
+clist = []
+
+for line in keywordsFile:
+    line = line.split(",")
+    if int(line[1]) == 10:
+        alist.append(line[0])
+    elif int(line[1]) == 5:
+        blist.append(line[0])
+    elif int(line[1]) == 1:
+        clist.append(line[0])
+
+
+allOfTweets = tweetsFile.read().split("\n")
+
+# Get all the info we need from the tweets
+
+for i in range(len(allOfTweets)):
+    latAndLong= getLatAndLong(allOfTweets[i])
+    timeZone = findTimeZone(float(latAndLong[0]),float(latAndLong[1]))
+    tweets = allOfTweets[i].split(" ", 5)[5]
+    score = tweetsValue(tweets)
+    if timeZone == "Eastern":
+        eTweets = eTweets + 1
+        eScore = eScore + score
+    elif timeZone == "Central":
+        cTweets = cTweets + 1
+        cScore = cScore + score
+    elif timeZone == "Mountain":
+        mTweets = mTweets + 1
+        mScore = mScore + score
+    elif timeZone == "Pacific":
+        pTweets = pTweets + 1
+        pScore = pScore + score
+
+# Print out the final statements with all of the results done.
+
+print("The Eastern Time Zone happiness score is:", round(eScore/eTweets,3), "and there were", int(eTweets),
+                                                        "tweets from that Time Zone.")
+print("The Central Time Zone happiness score is:", round(cScore/cTweets,3), "and there were", int(cTweets),
+                                                        "tweets from that Time Zone.")
+print("The Mountain Time Zone happiness score is:", round(mScore/mTweets,3), "and there were", int(mTweets),
+                                                        "tweets from that Time Zone.")
+print("The Pacific Time Zone happiness score is:", round(pScore/pTweets,3), "and there were", int(pTweets),
+                                                        "tweets from that Time Zone.")
