@@ -1,0 +1,69 @@
+# I will complete a program that computes rental costs for a car rental company
+# The first part I will do is prompt the user to enter information about themselves a vehicle
+
+# Collect all the information you need from the customer
+import math
+# add in constants first
+# CONSTANTS
+BASE_CHARGE_CODE_B = 20.0
+BASE_CHARGE_CODE_D = 50.0
+BASE_CHARGE_CODE_W = 200.0
+
+KM_DRIVEN = 0.30
+ageCharge = 10.0
+totalCost = 0.0
+# write out the user inputs we need for the program
+name = str(input("Please enter your name: "))
+age = int(input("Please enter your age: "))
+classifCode = input("Please enter your classification code: ")
+classifCode = classifCode.upper()
+# this way it reads lower case lettering
+if not(classifCode == "B" or classifCode == "D" or classifCode == "W"):
+    raise ValueError("INVALID CLASSIFICATION CODE: {0}\n" "Name: {1}\n" "Age: {2}".format(classifCode, name, age))
+# i got raise ValueError from http://stackoverflow.com/questions/2052390/manually-raising-throwing-an-exception-in-python
+rentedDays = int(input("Please enter the number of days the vehicle was rented: "))
+odometerAtStart = int(input("Please enter the vehicle's odometer reading at the start of the rental period: "))
+odometerAtEnd = int(input("Please enter the vehicle's odometer reading at the end of the rental period: "))
+# calculate how far they have travelled
+if age < 25:
+    totalCost = ageCharge * rentedDays
+
+KM = (odometerAtEnd - odometerAtStart)
+#extraWeeks is the charge that is given if someone exceeds the 2000km per week limit each week
+# in classification code B
+extraWeeks = 100.0
+totalCost = 0.0
+# cost if it's code B
+if classifCode == "B":
+    totalCost += (KM_DRIVEN * KM)
+    totalCost += (BASE_CHARGE_CODE_B * rentedDays)
+    if age < 25:
+        totalCost += ageCharge * rentedDays
+elif classifCode == "D":
+    totalCost += (BASE_CHARGE_CODE_D * rentedDays)
+    if (KM / rentedDays) > 100:
+        totalCost += (KM_DRIVEN * (KM / rentedDays - 100)) * rentedDays
+    if age < 25:
+        totalCost += ageCharge * rentedDays
+else:
+    weeks = math.ceil(rentedDays / 7.0) # I got math.ceil from http://www.dotnetperls.com/round-python
+    KMPerWeek = (KM / weeks)
+    totalCost += (BASE_CHARGE_CODE_W * weeks)
+    if KMPerWeek > 2000:
+        totalCost += weeks * BASE_CHARGE_CODE_W
+        totalCost += ((KMPerWeek - 2000) * KM_DRIVEN)
+        if rentedDays > 7:
+            ((weeks + 1) - 1) + extraWeeks
+    if age < 25:
+        totalCost += ageCharge * rentedDays
+    elif KMPerWeek > 1000 and KMPerWeek < 2000:
+        totalCost += weeks * BASE_CHARGE_CODE_W
+        totalCost += 50.0 * weeks # 50.0 is an additional charge if KMPerWeek exceeds 1000 but not 2000
+    elif KM < 1000:
+        totalCost += weeks * BASE_CHARGE_CODE_W
+        totalCost = totalCost
+
+
+print ("Name: {0} \n" "Age: {1} \n" "Classification Code: {2} \n" "Days Rented: {3} \n" "Odometer reading at the start: {4}Km \n"
+"Odometer reading at the end: {5}Km \n" "KM driven: {6}Km \n" "Pricing: ${7} \n"
+       .format(name, age, classifCode, rentedDays, odometerAtStart, odometerAtEnd, KM, ("%.2f" % totalCost)))
