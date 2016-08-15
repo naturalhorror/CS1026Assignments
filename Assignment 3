@@ -1,0 +1,171 @@
+#Part 1 of Assignment
+class Country():
+# Have my instance variables
+    def __init__(self, name, population, area, continent):
+        self._name = name
+        self._continent = continent
+        self._population = population
+        self._area = area
+
+    def __repr__(self):
+        return str(self._name) + " in " + str(self._continent)
+
+# Have my getter methods
+    def getName(self):
+        return self._name
+    def getArea(self):
+        return self._area
+    def getContinent(self):
+        return self._continent
+    def getPopDensity(self):
+        return float(self._population)/float(self._area)
+    def setPopulation(self, population):
+        self._population = population
+    def getPopulation(self):
+        return self._population
+
+    def save(self, output):
+        self._density = int(self._population)/int(self._area)
+        output.write(str(self._name) + " | " + str(self._population) + " | " + str(self._area) + " | " + str(self._continent) + " | " + str(self._density) + "\n")
+
+
+# Part 2
+class CountryCatalogue:
+
+# Create the two dictionaries within CountryCatalogue
+    def __init__(self, data):
+
+        self._catalogue = {}
+        self._cDictionary ={}
+
+        continentFile=open("continent.txt", 'r')
+        line = continentFile.readline()
+        for line in continentFile:
+            lines=line.split(",")
+
+            self._cDictionary[lines[0]]=lines[1].strip()
+
+        inf=open(data,'r')
+        line = inf.readline()
+        for line in inf:
+            l1=line.split("|")
+            name=l1[0]
+            population=int(l1[1].replace(",",""))
+            area=float(l1[2].replace(",","").strip())
+            country=Country(name,population,area,self._cDictionary[name])
+            self._catalogue[country.getName()]=country
+
+# Write a function to allow the user to add a new country, population, area and continent
+    def addCountry(self):
+        valid = False
+        while valid == False:
+            new_country = input("Enter the new country: ")
+            if new_country not in self._catalogue:
+                valid = True
+                new_population = int(input("Enter the new population: "))
+                new_area = input("Enter the new area: ")
+                new_continent = input("Enter the new continent: ")
+                country1 = Country(new_country, new_population, new_area, new_continent)
+
+                self._catalogue[new_country] = country1
+                self._cDictionary[new_country] = new_continent
+                print("The new country, new population, new area, and new continent have been added. ")
+            else:
+                print("Error")
+
+
+# Allow the user to save the country
+    def saveCountryCatalogue(self, output):
+        outf=open(output,"w")
+        for c in sorted(self._catalogue):
+            self._catalogue[c].save(outf)
+
+# Allow the user to delete a country if it exists and write a confirmation message
+    def deleteCountry(self):
+        delete_country = input("Please enter a specific country name to delete it. ")
+        if delete_country in self._catalogue:
+            self._catalogue.pop(delete_country)
+            self._cDictionary.pop(delete_country)
+            print("The country was removed")
+
+# Allow the user to find a country and if it exists, print out the country's information
+    def findCountry(self):
+        c = input("Enter the country name you wish to find. ")
+        if c in self._catalogue:
+            print("Country: ", self._catalogue[c].getName())
+            print("Population: ", self._catalogue[c].getPopulation())
+            print("Area: ", self._catalogue[c].getArea())
+            print("Continent: ", self._catalogue[c].getContinent())
+            print("PopDensity:", self._catalogue[c].getPopDensity())
+        else:
+            print("The country does not exist.")
+
+# Filter the countries by the country and
+    def filterCountriesByContinent(self):
+        filterByContinent = str(input("Enter a specific continent: "))
+        for key in self._cDictionary:
+            if self._cDictionary[key] == filterByContinent:
+                print(key)
+
+# Print country catalogue
+    def printCountryCatalogue(self):
+            for key in self._catalogue:
+                countrycat = self._catalogue[key]
+                print(countrycat)
+
+# Set a population for a country
+    def setPopulationOfASelectedCountry(self):
+        entername = input("Enter the country who's population is to be updated: ")#.upper()
+        enterpop = int(input("Enter the new population: "))
+        for c in self._catalogue:
+            if entername==c:
+                self._catalogue[c].setPopulation(enterpop)
+                print("Population: ", self._catalogue[c].getPopulation())
+
+#Find the country with the largest population
+    def findCountryWithLargestPop(self):
+        largest = 0
+        for key in self._catalogue:
+            if self._catalogue[key].getPopulation() > largest:
+                largest=self._catalogue[key].getPopulation()
+                c=self._catalogue[key].getName()
+        print("The country with the largest population is: ", c)
+
+#Find the country with the smallest are
+    def findCountryWithSmallestArea(self):
+        smallValue = 1234567890987654321234567887654323
+        for country in self._catalogue:
+            if int(self._catalogue[country].getArea()) < smallValue:
+                smallValue = int(self._catalogue[country].getArea())
+                country3 = country
+        print("The country with smallest area is: ",country3)
+
+#Filter in the countries by popdensity
+    def filterCountriesByPopDensity(self):
+        lower = int(input("Enter lower bound for population density of interest:"))
+        upper = int(input("Enter upper bound for population density of interest:"))
+        target_countries = set() # create empty set to store all countries whose population densities fall between the
+        # lower and upper bounds provided by the user
+        for country in self._catalogue:
+            popdensity = self._catalogue[country].getPopDensity()
+            if popdensity > lower and popdensity < upper:
+                target_countries.add(country)
+        if len(target_countries) > 0:
+            print("The following countries have a population density greater than", lower, "and lower than", upper, ":")
+            print(target_countries)
+        else:
+            print("There are no countries in the catalogue that have a population density greater than", lower, "and lower than", upper)
+
+#Write a function to find the most populous continent
+    def findMostPopulousContinent(self):
+        continent_populations = {}
+        for country in self._catalogue:
+            if self._catalogue[country].getContinent() not in continent_populations:
+                continent_populations[self._catalogue[country].getContinent()] = self._catalogue[country].getPopulation()
+            else:
+                continent_populations[self._catalogue[country].getContinent()] += self._catalogue[country].getPopulation()
+        newNew = sorted(continent_populations.values())
+        for key in continent_populations:
+            if continent_populations[key] == newNew[-1]:
+                print("The most populous continent is", key)
+                print("There are ", newNew[-1], " people in ", key, ".")
